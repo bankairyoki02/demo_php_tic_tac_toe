@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe - Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Tic Tac Toe</h1>
+
+        <div class="game-info">
+            <p>Current Player: <span class="current-player" id="current-player">X</span></p>
+            <p class="game-result" id="game-result" style="display: none;"></p>
+        </div>
+
+        <div class="game-board" id="game-board">
+            <button class="cell" data-index="0" onclick="makeMove(0)"></button>
+            <button class="cell" data-index="1" onclick="makeMove(1)"></button>
+            <button class="cell" data-index="2" onclick="makeMove(2)"></button>
+            <button class="cell" data-index="3" onclick="makeMove(3)"></button>
+            <button class="cell" data-index="4" onclick="makeMove(4)"></button>
+            <button class="cell" data-index="5" onclick="makeMove(5)"></button>
+            <button class="cell" data-index="6" onclick="makeMove(6)"></button>
+            <button class="cell" data-index="7" onclick="makeMove(7)"></button>
+            <button class="cell" data-index="8" onclick="makeMove(8)"></button>
+        </div>
+
+        <button class="reset-btn" onclick="resetGame()">New Game</button>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            board: Array(9).fill(''),
+            currentPlayer: 'X',
+            gameOver: false,
+            winner: null
+        };
+
+        // Game logic functions
+        function checkWinner(board) {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                [0, 4, 8], [2, 4, 6] // diagonals
+            ];
+
+            for (const pattern of winPatterns) {
+                if (board[pattern[0]] !== '' &&
+                    board[pattern[0]] === board[pattern[1]] &&
+                    board[pattern[1]] === board[pattern[2]]) {
+                    return board[pattern[0]];
+                }
+            }
+
+            return null;
+        }
+
+        function makeMove(position) {
+            if (gameState.gameOver || gameState.board[position] !== '') {
+                return;
+            }
+
+            // Make the move
+            gameState.board[position] = gameState.currentPlayer;
+
+            // Update UI
+            const cell = document.querySelector(`[data-index="${position}"]`);
+            cell.textContent = gameState.currentPlayer;
+            cell.classList.add('filled');
+            cell.disabled = true;
+
+            // Check for winner
+            const winner = checkWinner(gameState.board);
+            if (winner) {
+                gameState.winner = winner;
+                gameState.gameOver = true;
+                showGameResult(`Player ${winner} wins!`);
+            } else if (!gameState.board.includes('')) {
+                gameState.gameOver = true;
+                gameState.winner = 'tie';
+                showGameResult("It's a tie!");
+            } else {
+                // Switch player
+                gameState.currentPlayer = gameState.currentPlayer === 'X' ? 'O' : 'X';
+                document.getElementById('current-player').textContent = gameState.currentPlayer;
+            }
+
+            // Disable all cells if game is over
+            if (gameState.gameOver) {
+                const cells = document.querySelectorAll('.cell');
+                cells.forEach(cell => cell.disabled = true);
+            }
+        }
+
+        function showGameResult(message) {
+            const gameInfo = document.querySelector('.game-info p:first-child');
+            const gameResult = document.getElementById('game-result');
+
+            gameInfo.style.display = 'none';
+            gameResult.textContent = message;
+            gameResult.style.display = 'block';
+        }
+
+        function resetGame() {
+            gameState = {
+                board: Array(9).fill(''),
+                currentPlayer: 'X',
+                gameOver: false,
+                winner: null
+            };
+
+            // Reset UI
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('filled');
+                cell.disabled = false;
+            });
+
+            // Reset game info
+            const gameInfo = document.querySelector('.game-info p:first-child');
+            const gameResult = document.getElementById('game-result');
+
+            gameInfo.style.display = 'block';
+            gameResult.style.display = 'none';
+            document.getElementById('current-player').textContent = 'X';
+        }
+
+        // Initialize animations when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const game = new TicTacToeGame();
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
